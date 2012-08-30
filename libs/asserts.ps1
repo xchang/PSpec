@@ -1,7 +1,4 @@
-Function AssertFileExists([string] $filePath) {
-    $is_file_exists = Test-Path $filePath
-    Assert($is_file_exists -eq $TRUE) "File: $filePath doesn't exist!"  
-}
+
 
 Function AssertFileNotExists([string] $filePath) {
     $is_file_exists = Test-Path $filePath
