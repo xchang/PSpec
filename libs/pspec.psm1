@@ -6,7 +6,7 @@ Function Spec {
     )
 
     $error.clear()
-    $pspec.totalTestsNumber ++
+    $pspec.totalTestsNumber = $pspec.totalTestsNumber + 1
     $pspec.currentTestName = $name
     try {
         & $action
@@ -15,10 +15,11 @@ Function Spec {
     }
 
     if ($pspec.results[$name] -eq $TRUE) {
-        $pspec.succeedTestNumber ++
+
+        $pspec.succeedTestsNumber = $pspec.succeedTestsNumber + 1
     	Write-Host "$name ... SUCCEED!" -f $correctColor
     } else {
-        $pspec.failedTestNumber ++
+        $pspec.failedTestsNumber = $pspec.failedTestsNumber + 1 
     	Write-Host "$name ... FAILED!" -f $errorColor
     	Write-Host "Error: $errorMsg" -f $errorColor
     }
@@ -43,7 +44,8 @@ Function AssertNotEquals($expected, $actual) {
 }
 
 Function AssertFileExists([string] $filePath) {
-    $is_file_exists = Test-Path $filePath
+    $specPath = $pspec.Get_Item("specPath")
+    $is_file_exists = Test-Path "$specPath\$filePath"
     if (-not $is_file_exists) {
         $pspec.results.Add($pspec.currentTestName, $FALSE)
         throw "File: $filePath does NOT exist"
@@ -52,14 +54,25 @@ Function AssertFileExists([string] $filePath) {
     $pspec.results.Add($pspec.currentTestName, $TRUE)
 }
 
+Function Invoke-Specs([string]$specPath){
+    dir $specPath | ? {$_.name -match "\.ps1$"} | foreach {& $_.FullName }
+
+    $total = $pspec.totalTestsNumber
+    $succeed = $pspec.succeedTestsNumber
+    $failed = $pspec.failedTestsNumber
+
+    Write-Host "$total tests run, $succeed succeeded, $failed failed."
+}
+
+$currentDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Script:pspec = @{}
-$pspec.version = "0.0.1"
+#$pspec.version = "0.0.1"
 $pspec.context = new-object system.collections.stack
 $pspec.results = @{}
-$pspec.totalTestsNumber = 0;
-$pspec.succeedTestsNumber = 0;
-$pspec.failedTestsNumber = 0;
-
+$pspec.Set_Item("specPath", "$currentDir\..\specs")
+$pspec.totalTestsNumber = 0
+$pspec.succeedTestsNumber = 0
+$pspec.failedTestsNumber = 0
 $errorColor = "RED"
 $correctColor = "GREEN"
 
