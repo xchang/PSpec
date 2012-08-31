@@ -7,7 +7,7 @@ Spec "should be equal for same strings" {
 }
 
 Spec "should be equal for same strings" {
-	AssertEquals "Hello World!" "Hello World!"
+	#Empty spec for checking duplicate name
 }
 
 Spec "should be equal for two integers" {

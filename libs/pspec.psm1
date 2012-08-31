@@ -37,7 +37,7 @@ Function Invoke-Specs([string]$specPath){
     $failed = $pspec.failedTestsNumber
 
     Write-Host
-    Write-Host "$total tests run, $succeed succeeded, $failed failed."
+    Write-Host "$total specs run, $succeed succeeded, $failed failed."
 }
 
 Function Write-Fail ([string] $msg) {
