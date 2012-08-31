@@ -1,27 +1,31 @@
 Function Spec {
     [CmdletBinding()]  
     param(
-        [Parameter(Position=0,Mandatory=1)][string]$name = $null,
-        [Parameter(Position=1,Mandatory=0)][scriptblock]$action = $null
+        [Parameter(Position=0,Mandatory=1)][string]$name,
+        [Parameter(Position=1,Mandatory=0)][scriptblock]$action
     )
 
     $error.clear()
     $pspec.totalTestsNumber = $pspec.totalTestsNumber + 1
-    $pspec.currentTestName = $name
+
     try {
+        if ($pspec.results.ContainsKey($name)) {
+            throw "Spec with a same name already exists."
+        }
         & $action
-    }catch {
-        $errorMsg = $_
+    } catch [Exception] {
+        $errorMsg = $_.Exception.Message 
     }
 
-    if ($pspec.results[$name] -eq $TRUE) {
-
-        $pspec.succeedTestsNumber = $pspec.succeedTestsNumber + 1
-    	Write-Host "$name ... SUCCEED!" -f $correctColor
-    } else {
+    if ($errorMsg -ne $null) {
+        $pspec.results[$name] = $FALSE
         $pspec.failedTestsNumber = $pspec.failedTestsNumber + 1 
-    	Write-Host "$name ... FAILED!" -f $errorColor
-    	Write-Host "Error: $errorMsg" -f $errorColor
+        Write-Fail "$name ... FAILED!"
+        Write-Fail "Error: $errorMsg"
+    } else {
+        $pspec.results[$name] = $TRUE
+        $pspec.succeedTestsNumber = $pspec.succeedTestsNumber + 1
+        Write-Success "$name ... SUCCEED!"
     }
 }
 
@@ -32,21 +36,38 @@ Function Invoke-Specs([string]$specPath){
     $succeed = $pspec.succeedTestsNumber
     $failed = $pspec.failedTestsNumber
 
+    Write-Host
     Write-Host "$total tests run, $succeed succeeded, $failed failed."
 }
 
+Function Write-Fail ([string] $msg) {
+    Write-Host $msg -f RED
+}
+
+Function Write-Success ([string] $msg) {
+    Write-Host $msg -f GREEN
+}
+
+Function Write-Logo {
+    $version = $pspec.version
+    Write-Host "PSpec - A test framework for Windows PowerShell"
+    Write-Host "Verison $version"
+    Write-Host
+}
+
+
 $currentDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Script:pspec = @{}
-#$pspec.version = "0.0.1"
+$pspec.version = "0.0.1"
 $pspec.context = new-object system.collections.stack
 $pspec.results = @{}
 $pspec.Set_Item("specPath", "$currentDir\..\specs")
 $pspec.totalTestsNumber = 0
 $pspec.succeedTestsNumber = 0
 $pspec.failedTestsNumber = 0
-$errorColor = "RED"
-$correctColor = "GREEN"
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 dir $scriptDir | ? {$_.name -match "\.ps1$"} | foreach {. $_.FullName }
+
+Write-Logo

@@ -1,10 +1,7 @@
 Function Assert($condition, $errorMsg) {
 	if (-not $condition) {
-        $pspec.results.Add($pspec.currentTestName, $FALSE)
 		throw "$errorMsg"
 	}
-
-    $pspec.results.Add($pspec.currentTestName, $TRUE)
 }
 
 Function AssertEquals($expected, $actual) {
