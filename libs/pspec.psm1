@@ -25,35 +25,6 @@ Function Spec {
     }
 }
 
-Function AssertEquals($expected, $actual) {
-	if ($expected -ne $actual) {
-        $pspec.results.Add($pspec.currentTestName, $FALSE)
-		throw "$expected does NOT equal to $actual"
-	}
-
-    $pspec.results.Add($pspec.currentTestName, $TRUE)
-}
-
-Function AssertNotEquals($expected, $actual) {
-    if ($expected -eq $actual) {
-        $pspec.results.Add($pspec.currentTestName, $FALSE)
-        throw "$expected equals to $actual"
-    }
-
-    $pspec.results.Add($pspec.currentTestName, $TRUE)
-}
-
-Function AssertFileExists([string] $filePath) {
-    $specPath = $pspec.Get_Item("specPath")
-    $is_file_exists = Test-Path "$specPath\$filePath"
-    if (-not $is_file_exists) {
-        $pspec.results.Add($pspec.currentTestName, $FALSE)
-        throw "File: $filePath does NOT exist"
-    } 
-
-    $pspec.results.Add($pspec.currentTestName, $TRUE)
-}
-
 Function Invoke-Specs([string]$specPath){
     dir $specPath | ? {$_.name -match "\.ps1$"} | foreach {& $_.FullName }
 

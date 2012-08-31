@@ -1,1 +1,0 @@
- #/home/twer/backup/jenkins/backup_20120830_1444.tar.gz
